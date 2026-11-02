@@ -1,0 +1,730 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Фембой хаус</title>
+<meta name="description" content="Фембой хаус: телеграм-чат с фембоями, игра в Роблоксе и рулетка идей для видео.">
+<meta name="theme-color" content="#245edb">
+<meta property="og:title" content="Фембой хаус">
+<meta property="og:description" content="Телеграм-чат с фембоями, игра в Роблоксе и рулетка идей.">
+<link rel="icon" type="image/png" href="favicon.png">
+<style>
+:root {
+  --tb: 40px;
+  --beige: #ece9d8;
+  --frame: #0054e3;
+  --link: #1a4fb0;
+  --ui: Tahoma, "Segoe UI", Verdana, sans-serif;
+  --title: "Trebuchet MS", Tahoma, "Segoe UI", sans-serif;
+  --safe-b: env(safe-area-inset-bottom, 0px);
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; margin: 0; overflow: hidden; }
+body { font: 13px/1.35 var(--ui); color: #000; background: #3a7bd9; user-select: none; -webkit-user-select: none; }
+button { font: inherit; color: inherit; cursor: pointer; }
+a { color: var(--link); }
+[hidden] { display: none !important; }
+:focus-visible { outline: 2px dotted #000; outline-offset: 1px; }
+.vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+/* ================= рабочий стол: небо, холмы, облака, снег */
+.desk { position: fixed; inset: 0; bottom: calc(var(--tb) + var(--safe-b)); overflow: hidden; background: linear-gradient(180deg, #1f5fd0 0%, #3d86e8 30%, #7fb8f5 55%, #bfe0fc 72%, #e6f4ff 100%); }
+.hills { position: absolute; inset: 0; width: 100%; height: 100%; }
+.cloud { position: absolute; width: 360px; height: 90px; border-radius: 90px; background: radial-gradient(ellipse at 50% 60%, rgba(255,255,255,.95), rgba(255,255,255,.55) 55%, rgba(255,255,255,0) 72%); filter: blur(5px); opacity: .9; animation: cloud var(--d, 120s) linear infinite; animation-delay: var(--delay, 0s); }
+.cloud::before, .cloud::after { content: ""; position: absolute; border-radius: 50%; background: inherit; }
+.cloud::before { width: 55%; height: 140%; left: 12%; top: -55%; }
+.cloud::after { width: 45%; height: 120%; right: 10%; top: -40%; }
+@keyframes cloud { from { transform: translateX(-420px); } to { transform: translateX(calc(100vw + 120px)); } }
+#snow { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+
+/* ================= значки рабочего стола */
+.icons { position: absolute; left: 10px; top: 12px; display: grid; grid-auto-flow: row; gap: 6px; z-index: 1; }
+.dicon { width: 84px; padding: 6px 4px 5px; display: flex; flex-direction: column; align-items: center; gap: 4px; background: none; border: 1px solid transparent; border-radius: 2px; text-align: center; color: #fff; text-shadow: 1px 1px 2px #0a2a6b, 0 0 3px #0a2a6b; }
+.dicon svg, .dicon img { width: 48px; height: 48px; display: block; filter: drop-shadow(1px 2px 1px rgba(0,0,40,.45)); }
+.dicon img { border-radius: 50%; }
+.dicon span { font-size: 12px; line-height: 1.15; padding: 1px 3px; overflow-wrap: anywhere; }
+.dicon:hover span { background: rgba(49,106,197,.45); }
+.dicon.sel { border-color: rgba(255,255,255,.35); }
+.dicon.sel span { background: #316ac5; outline: 1px dotted #fff; text-shadow: none; }
+
+/* ================= окна */
+.win { position: absolute; display: flex; flex-direction: column; min-width: 280px; max-width: calc(100vw - 8px); padding: 0 4px 4px; background: linear-gradient(180deg, #0058ee, #3593ff 3px, #288eff 40%, #005bff); border: 1px solid #0831d9; border-radius: 9px 9px 0 0; box-shadow: 3px 5px 16px rgba(0,0,50,.5), inset 0 0 0 1px rgba(255,255,255,.18); }
+.win.inactive { background: #7f96d8; border-color: #5b6fb0; box-shadow: 2px 3px 10px rgba(0,0,50,.35); }
+.titlebar { flex: none; height: 30px; display: flex; align-items: center; gap: 6px; padding: 0 3px 0 4px; margin: 0 -4px; border-radius: 8px 8px 0 0; cursor: default; touch-action: none; background: linear-gradient(180deg, #0997ff 0%, #0053ee 8%, #0050ee 40%, #06f 88%, #06f 93%, #005bff 95%, #003dd7 96%, #003dd7 100%); color: #fff; font: 700 13px var(--title); text-shadow: 1px 1px #0f1089; }
+.win.inactive .titlebar { background: linear-gradient(180deg, #a8bbf0 0%, #7697e7 8%, #7a96df 40%, #8ea8ea 88%, #7b94dc 100%); text-shadow: none; }
+.ticon { width: 18px; height: 18px; flex: none; border-radius: 50%; }
+.ticon svg { width: 18px; height: 18px; display: block; }
+.ttl { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tbtns { display: flex; gap: 2px; }
+.tb { width: 22px; height: 22px; padding: 0; border: 1px solid #fff; border-radius: 4px; display: grid; place-items: center; background: radial-gradient(circle at 28% 22%, #8db3ff 0, #2f6af0 52%, #1448c8 100%); box-shadow: inset -1px -1px 2px rgba(0,0,60,.35); }
+.tb:hover { filter: brightness(1.12); }
+.tb:active { filter: brightness(.9); }
+.tb.close { background: radial-gradient(circle at 28% 22%, #f6b29b 0, #dd5a30 52%, #b03512 100%); }
+.tb svg { width: 12px; height: 12px; stroke: #fff; stroke-width: 2; fill: none; stroke-linecap: square; filter: drop-shadow(0 0 1px rgba(0,0,80,.7)); }
+.win.inactive .tb { opacity: .8; }
+.wbody { flex: 1; min-height: 0; overflow: auto; background: var(--beige); user-select: text; -webkit-user-select: text; }
+.win.max { left: 0 !important; top: 0 !important; width: 100% !important; height: calc(100% - var(--tb) - var(--safe-b)) !important; max-width: none; border-radius: 0; }
+.win.max .titlebar { border-radius: 0; }
+.win.min { display: none; }
+
+/* кнопки и поля в духе XP */
+.xp-btn { min-width: 88px; padding: 4px 14px; border: 1px solid #003c74; border-radius: 3px; background: linear-gradient(180deg, #fff 0%, #f6f5f0 82%, #d8d2c5 100%); font: 12px var(--ui); color: #000; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; text-align: center; box-shadow: inset 0 -1px 0 rgba(0,0,0,.06); }
+.xp-btn:hover { box-shadow: inset 0 0 0 2px #f8b330; }
+.xp-btn.def { box-shadow: inset 0 0 0 2px #98b8ea; }
+.xp-btn.def:hover { box-shadow: inset 0 0 0 2px #f8b330; }
+.xp-btn:active { background: linear-gradient(180deg, #d8d2c5, #ece9d8); box-shadow: inset 1px 1px 2px rgba(0,0,0,.3); }
+.status { flex: none; display: flex; gap: 2px; padding: 3px 4px; background: var(--beige); border-top: 1px solid #fff; font-size: 11px; box-shadow: 0 -1px 0 #aca899; }
+.status span { padding: 1px 8px; border: 1px solid; border-color: #aca899 #fff #fff #aca899; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.status span + span { flex: none; }
+
+/* ================= профиль (проводник) */
+.explorer { display: grid; grid-template-columns: 176px 1fr; min-height: 100%; }
+.pane { padding: 12px 10px; background: linear-gradient(180deg, #7ba2e7 0%, #6375d6 100%); display: flex; flex-direction: column; gap: 12px; }
+.grp { border-radius: 6px 6px 0 0; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,60,.25); }
+.grp h3 { margin: 0; padding: 4px 8px; font: 700 12px var(--ui); color: #fff; background: linear-gradient(90deg, #0c3fb8, #3b78e0); }
+.grp.alt h3 { background: linear-gradient(90deg, #0c3fb8, #3b78e0); }
+.grp ul { list-style: none; margin: 0; padding: 8px; background: #d6dff7; display: grid; gap: 7px; font-size: 12px; }
+.grp p { margin: 0; padding: 8px; background: #d6dff7; font-size: 12px; }
+.grp li a { display: flex; align-items: center; gap: 7px; color: var(--link); text-decoration: none; }
+.grp li a:hover { text-decoration: underline; color: #ff6a00; }
+.grp li svg { width: 16px; height: 16px; flex: none; }
+.main { padding: 16px 18px 18px; background: #fff; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.me { display: flex; align-items: center; gap: 16px; }
+.avatar { flex: none; width: 108px; height: 108px; border-radius: 50%; padding: 3px; background: linear-gradient(135deg, #fff, #9fc2ff); box-shadow: 0 0 0 3px #3a76e8, 0 3px 10px rgba(0,30,120,.45); }
+.avatar img { display: block; width: 100%; height: 100%; border-radius: 50%; }
+.me h1 { margin: 0; font: 700 30px/1.05 var(--title); color: #0b3ca8; text-shadow: 1px 1px 0 #cfe0ff; }
+.me p { margin: 5px 0 0; font-size: 12px; color: #4b4b4b; display: flex; align-items: center; gap: 6px; }
+.dot { width: 9px; height: 9px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #b8ffa0, #2fb511); box-shadow: 0 0 5px #5fe03c; animation: blink 2.4s ease-in-out infinite; }
+@keyframes blink { 50% { opacity: .45; } }
+.bio { margin: 0; padding: 9px 12px; border: 1px solid #b9c9ea; border-radius: 6px; background: linear-gradient(180deg, #f7faff, #e9f0ff); font-size: 13px; }
+.main h2 { margin: 2px 0 -6px; font: 700 13px var(--ui); color: #0b3ca8; display: flex; align-items: center; gap: 8px; }
+.main h2::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, #7ea2e0, transparent); }
+.links { display: grid; gap: 10px; }
+.row { display: grid; grid-template-columns: 54px 1fr auto; align-items: center; gap: 12px; padding: 10px 12px; border: 1px solid #a9bfe8; border-radius: 7px; background: linear-gradient(180deg, #fff 0%, #eef4ff 100%); color: #000; text-decoration: none; box-shadow: 0 1px 0 #fff inset, 0 2px 4px rgba(0,40,120,.15); transition: transform .08s, box-shadow .12s, border-color .12s; }
+.row:hover { border-color: #316ac5; background: linear-gradient(180deg, #fff 0%, #ddeaff 100%); box-shadow: 0 0 0 2px #fcd37a inset, 0 3px 8px rgba(0,40,120,.25); }
+.row:active { transform: translateY(1px); }
+.row svg { width: 54px; height: 54px; filter: drop-shadow(1px 2px 1px rgba(0,0,60,.3)); }
+.row b { display: block; font: 700 15px var(--title); color: #0b3ca8; }
+.row small { display: block; margin-top: 2px; font-size: 12px; color: #4b4b4b; }
+.tag { display: inline-block; margin-left: 6px; padding: 0 6px; border: 1px solid #b3261e; border-radius: 3px; background: #fff0ee; color: #b3261e; font: 700 11px var(--ui); vertical-align: 1px; }
+.go { white-space: nowrap; }
+
+/* ================= диалоги, игра, блокнот */
+.dlg { padding: 18px 18px 14px; display: grid; grid-template-columns: 56px 1fr; gap: 14px; }
+.dlg > svg { width: 56px; height: 56px; filter: drop-shadow(1px 2px 1px rgba(0,0,60,.3)); }
+.dlg h4 { margin: 0 0 6px; font: 700 15px var(--title); color: #0b3ca8; }
+.dlg p { margin: 0 0 8px; }
+.dlg .tip { padding: 6px 9px; border: 1px solid #e6d98a; border-radius: 4px; background: #fffbe1; font-size: 12px; }
+.btns { grid-column: 1 / -1; display: flex; justify-content: flex-end; gap: 8px; padding-top: 6px; }
+.shot { grid-column: 1 / -1; position: relative; border: 2px solid; border-color: #aca899 #fff #fff #aca899; background: #000; overflow: hidden; }
+.shot img { display: block; width: 100%; height: auto; }
+.shot .age { position: absolute; right: 8px; top: 8px; padding: 2px 9px; border: 3px solid #161616; border-radius: 99px; background: #ff3b5c; color: #fff; font: 900 16px var(--title); box-shadow: 0 2px 0 #161616; }
+.note { background: #fff; display: flex; flex-direction: column; height: 100%; }
+.menubar { flex: none; display: flex; gap: 14px; padding: 2px 8px; background: var(--beige); border-bottom: 1px solid #aca899; font-size: 12px; }
+.note pre { flex: 1; margin: 0; padding: 8px 10px; background: #fff; font: 13px/1.5 "Lucida Console", Consolas, "Courier New", monospace; white-space: pre-wrap; overflow: auto; }
+
+/* ================= панель задач, «пуск», меню */
+.taskbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 3000; height: calc(var(--tb) + var(--safe-b)); padding-bottom: var(--safe-b); display: flex; align-items: stretch; gap: 6px; background: linear-gradient(180deg, #3168d5 0%, #4993e6 5%, #2a63d6 12%, #245edb 50%, #1f56d0 86%, #1941a5 100%); box-shadow: 0 -1px 0 #0b3fb8; }
+.start { flex: none; display: flex; align-items: center; gap: 6px; padding: 0 22px 0 12px; border: 0; border-radius: 0 14px 14px 0; background: linear-gradient(180deg, #5bc15b 0%, #3ea53e 12%, #35913a 55%, #3aa13d 90%, #2b7a2e 100%); box-shadow: inset -2px 0 3px rgba(0,60,0,.45), inset 0 2px 2px rgba(255,255,255,.45); color: #fff; font: italic 700 22px/1 var(--title); text-shadow: 1px 2px 2px rgba(0,50,0,.6); letter-spacing: .5px; }
+.start:hover { filter: brightness(1.08); }
+.start.on, .start:active { filter: brightness(.85); }
+.start svg { width: 26px; height: 24px; filter: drop-shadow(1px 1px 1px rgba(0,40,0,.55)); }
+.tasks { flex: 1; min-width: 0; display: flex; align-items: center; gap: 3px; padding: 3px 0; overflow: hidden; }
+.task { flex: 0 1 168px; min-width: 0; height: 100%; display: flex; align-items: center; gap: 6px; padding: 0 8px; border: 1px solid #0f3fa8; border-radius: 3px; background: linear-gradient(180deg, #5a95f2 0%, #3c81f3 12%, #3a75e6 85%, #2b63d4 100%); color: #fff; font: 12px var(--ui); text-align: left; text-shadow: none; box-shadow: inset 1px 1px 0 rgba(255,255,255,.25); }
+.task:hover { filter: brightness(1.1); }
+.task.act { background: linear-gradient(180deg, #1e4fb8 0%, #2a5fcc 100%); box-shadow: inset 1px 1px 3px rgba(0,0,40,.6); }
+.task .ticon { width: 16px; height: 16px; }
+.task span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tray { flex: none; display: flex; align-items: center; gap: 4px; padding: 0 12px 0 10px; border-left: 1px solid #0b3fb8; background: linear-gradient(180deg, #0f8ef0 0%, #0c76e6 12%, #0c5fcf 70%, #0a52b8 100%); box-shadow: inset 1px 0 0 #1a8af2; color: #fff; font-size: 12px; }
+.tray button { width: 24px; height: 24px; padding: 0; border: 0; border-radius: 3px; background: none; display: grid; place-items: center; }
+.tray button:hover { background: rgba(255,255,255,.22); }
+.tray button svg { width: 16px; height: 16px; }
+.tray button[aria-pressed="false"] { opacity: .5; }
+.clock { padding-left: 6px; min-width: 42px; text-align: right; }
+
+.smenu { position: fixed; left: 0; bottom: calc(var(--tb) + var(--safe-b)); z-index: 2900; width: min(392px, 100vw); display: flex; flex-direction: column; border: 1px solid #0831d9; border-bottom: 0; border-radius: 9px 9px 0 0; overflow: hidden; background: #fff; box-shadow: 3px -3px 14px rgba(0,0,50,.45); animation: up .12s ease-out; }
+@keyframes up { from { transform: translateY(14px); opacity: 0; } }
+.smenu header { display: flex; align-items: center; gap: 10px; padding: 8px 10px; background: linear-gradient(180deg, #2f6fe0 0%, #1f5bd3 40%, #1a4fc0 100%); color: #fff; font: 700 17px var(--title); text-shadow: 1px 1px 2px #0a2a8a; box-shadow: inset 0 -2px 0 #f2a03a; }
+.smenu header img { width: 44px; height: 44px; border-radius: 50%; border: 2px solid #fff; }
+.scols { display: grid; grid-template-columns: 1.25fr 1fr; }
+.scols > div { padding: 6px 4px; display: flex; flex-direction: column; }
+.scols .l { background: #fff; }
+.scols .r { background: #d3e5fa; border-left: 1px solid #95bdee; }
+.mi { display: flex; align-items: center; gap: 9px; padding: 7px 8px; border: 0; background: none; text-align: left; text-decoration: none; color: #000; font: 12px var(--ui); border-radius: 2px; width: 100%; }
+.mi:hover { background: #316ac5; color: #fff; }
+.mi svg, .mi img { width: 32px; height: 32px; flex: none; }
+.mi img { border-radius: 50%; }
+.mi b { display: block; font-size: 13px; }
+.mi small { display: block; opacity: .75; font-size: 11px; }
+.scols .r .mi { padding: 6px 8px; }
+.scols .r .mi svg { width: 22px; height: 22px; }
+.sep { height: 1px; margin: 4px 8px; background: linear-gradient(90deg, transparent, #95bdee, transparent); }
+.smenu footer { display: flex; justify-content: flex-end; padding: 6px 10px; background: linear-gradient(180deg, #4a85e6, #2a5fd0); }
+.smenu footer button { display: flex; align-items: center; gap: 6px; padding: 3px 8px; border: 0; border-radius: 3px; background: none; color: #fff; font: 12px var(--ui); }
+.smenu footer button:hover { background: rgba(255,255,255,.2); }
+.smenu footer svg { width: 22px; height: 22px; }
+
+.balloon { position: fixed; right: 10px; bottom: calc(var(--tb) + var(--safe-b) + 12px); z-index: 2800; width: min(300px, calc(100vw - 20px)); padding: 9px 26px 10px 12px; border: 1px solid #000; border-radius: 9px; background: #ffffe1; box-shadow: 2px 3px 8px rgba(0,0,0,.4); text-align: left; animation: up .25s ease-out; cursor: pointer; }
+.balloon::after { content: ""; position: absolute; right: 26px; bottom: -9px; width: 14px; height: 14px; background: #ffffe1; border: solid #000; border-width: 0 1px 1px 0; transform: rotate(45deg) skew(10deg, 10deg); }
+.balloon b { display: flex; align-items: center; gap: 6px; margin-bottom: 3px; font-size: 12px; }
+.balloon b svg { width: 16px; height: 16px; }
+.balloon p { margin: 0; font-size: 12px; }
+.balloon .x { position: absolute; right: 4px; top: 4px; width: 18px; height: 18px; padding: 0; border: 0; background: none; font-size: 14px; line-height: 1; border-radius: 3px; }
+.balloon .x:hover { background: rgba(0,0,0,.12); }
+
+/* ================= экран приветствия */
+.welcome { position: fixed; inset: 0; z-index: 5000; display: flex; flex-direction: column; background: radial-gradient(ellipse at 28% 45%, #7ea3ee 0%, #5a7edc 55%, #4766c8 100%); color: #fff; transition: opacity .5s; }
+.welcome.out { opacity: 0; pointer-events: none; }
+.w-top { flex: none; height: 12vh; min-height: 56px; background: linear-gradient(180deg, #00309c, #003bbd); border-bottom: 2px solid #98b4ee; }
+.w-bot { flex: none; height: 14vh; min-height: 64px; background: linear-gradient(180deg, #003bbd, #00309c); border-top: 2px solid; border-image: linear-gradient(90deg, #0a3aa8 0%, #f0a040 50%, #0a3aa8 100%) 1; display: flex; align-items: center; padding: 0 28px; font-size: 13px; color: #cfdcff; }
+.w-mid { flex: 1; display: grid; grid-template-columns: 1fr 2px 1fr; align-items: center; gap: 0; padding: 0 4vw; min-height: 0; }
+.w-left { justify-self: end; padding-right: 5vw; text-align: right; }
+.w-logo { display: flex; align-items: center; justify-content: flex-end; gap: 12px; font: italic 700 clamp(36px, 6vw, 64px)/1 var(--title); text-shadow: 2px 3px 4px rgba(0,20,100,.55); }
+.w-logo svg { width: clamp(44px, 6vw, 70px); height: auto; }
+.w-left p { margin: 10px 0 0; font: 17px var(--ui); color: #fff; }
+.w-sep { align-self: stretch; margin: 6vh 0; background: linear-gradient(180deg, transparent, #fff, transparent); opacity: .7; }
+.w-right { justify-self: start; padding-left: 5vw; }
+.user { display: flex; align-items: center; gap: 14px; padding: 10px 18px 10px 10px; border: 2px solid transparent; border-radius: 8px; background: none; color: #fff; text-align: left; }
+.user:hover, .user:focus-visible { background: linear-gradient(90deg, #2850b0cc, #5a7edc00); border-color: rgba(255,255,255,.5); outline: 0; }
+.user img { width: 76px; height: 76px; padding: 3px; border-radius: 8px; border: 2px solid #fff; box-shadow: 0 0 0 1px #3a58b0, 2px 3px 6px rgba(0,0,60,.5); background: linear-gradient(135deg, #fff, #a9c4f5); }
+.user b { display: block; font: 700 26px var(--ui); text-shadow: 1px 1px 2px #0a2a8a; }
+.user small { display: block; margin-top: 2px; font-size: 14px; color: #d8e3ff; }
+.loading { display: none; text-align: left; }
+.loading b { display: block; font: 700 20px var(--ui); margin-bottom: 12px; }
+.pbar { width: 240px; height: 18px; padding: 2px; border: 2px solid #b7c3e6; border-radius: 4px; background: #fff; overflow: hidden; }
+.pbar i { display: block; width: 90px; height: 100%; background: repeating-linear-gradient(90deg, #2bd22b 0 10px, transparent 10px 13px); animation: run 1s linear infinite; }
+@keyframes run { from { transform: translateX(-100px); } to { transform: translateX(250px); } }
+.welcome.busy .user { display: none; }
+.welcome.busy .loading { display: block; }
+
+/* ================= телефон */
+@media (max-width: 720px) {
+  .win { position: fixed; left: 6px !important; right: 6px; top: 6px !important; bottom: calc(var(--tb) + var(--safe-b) + 6px); width: auto !important; height: auto !important; min-width: 0; }
+  .win.max { left: 0 !important; right: 0; top: 0 !important; bottom: calc(var(--tb) + var(--safe-b)); height: auto !important; }
+  .win[data-nomax] { bottom: auto; top: 9vh !important; }
+  .tb.maxb { display: none; }
+  .titlebar { height: 34px; }
+  .tb { width: 28px; height: 26px; }
+  .explorer { grid-template-columns: 1fr; }
+  .pane { display: none; }
+  .main { padding: 14px 12px 16px; }
+  .me { flex-direction: column; text-align: center; gap: 10px; }
+  .me p { justify-content: center; }
+  .avatar { width: 132px; height: 132px; }
+  .me h1 { font-size: 28px; }
+  .row { grid-template-columns: 46px 1fr; padding: 11px 12px; }
+  .row svg { width: 46px; height: 46px; }
+  .row .go { grid-column: 1 / -1; min-height: 40px; }
+  .xp-btn { min-height: 38px; }
+  .dlg { padding: 14px 12px 12px; grid-template-columns: 44px 1fr; gap: 10px; }
+  .dlg > svg { width: 44px; height: 44px; }
+  .btns .xp-btn { flex: 1; }
+  .icons { grid-auto-flow: column; grid-template-columns: repeat(4, 1fr); left: 4px; right: 4px; top: 10px; }
+  .dicon { width: auto; }
+  .task { flex: 1 1 0; padding: 0 6px; }
+  .task span:not(.ticon) { display: none; }
+  .task { justify-content: center; }
+  .start { padding: 0 16px 0 9px; font-size: 20px; }
+  .tray .opt { display: none; }
+  .w-mid { grid-template-columns: 1fr; grid-template-rows: auto 2px auto; justify-items: center; align-content: center; gap: 18px; padding: 0 6vw; }
+  .w-left, .w-right { justify-self: center; padding: 0; text-align: center; }
+  .w-logo { justify-content: center; }
+  .w-sep { width: 70%; height: 2px; margin: 0; align-self: auto; background: linear-gradient(90deg, transparent, #fff, transparent); }
+  .w-bot { padding: 0 16px; }
+  .scols { grid-template-columns: 1fr; }
+  .scols .r { display: none; }
+}
+@media (max-width: 720px) and (max-height: 560px) { .me { flex-direction: row; text-align: left; } .avatar { width: 84px; height: 84px; } }
+@media (prefers-reduced-motion: reduce) { .cloud, .dot, .pbar i { animation: none; } .welcome { transition: none; } }
+</style>
+</head>
+<body>
+
+<!-- ============ иконки (SVG-символы) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="g-blue" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#58c4f4"/><stop offset="1" stop-color="#1b7fd0"/></linearGradient>
+    <linearGradient id="g-pink" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff8cc2"/><stop offset="1" stop-color="#e83a8c"/></linearGradient>
+    <linearGradient id="g-paper" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#dfe8fa"/></linearGradient>
+    <linearGradient id="g-folder" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe58a"/><stop offset="1" stop-color="#e9b23a"/></linearGradient>
+    <linearGradient id="g-green" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7fe06b"/><stop offset="1" stop-color="#2f9e33"/></linearGradient>
+  </defs>
+  <symbol id="i-tg" viewBox="0 0 48 48">
+    <circle cx="24" cy="24" r="21" fill="url(#g-blue)" stroke="#0e5da8" stroke-width="2"/>
+    <ellipse cx="24" cy="14" rx="15" ry="8" fill="#fff" opacity=".22"/>
+    <path d="M11 23.5 36.5 13c1.2-.5 2.2.3 1.9 1.9l-4.1 19.4c-.3 1.3-1.1 1.6-2.2 1l-6.2-4.6-3 2.9c-.3.3-.6.6-1.2.6l.4-6.3L34 17.6c.5-.5-.1-.7-.8-.3L19 26.3l-6.100-1.9c-1.3-.4-1.300-1.300.1-1.900Z" fill="#fff"/>
+  </symbol>
+  <symbol id="i-game" viewBox="0 0 48 48">
+    <rect x="6" y="18" width="36" height="25" rx="3" fill="url(#g-pink)" stroke="#a61e63" stroke-width="2"/>
+    <rect x="3" y="12" width="42" height="9" rx="2.5" fill="#ff6fb0" stroke="#a61e63" stroke-width="2"/>
+    <rect x="21" y="12" width="6" height="31" fill="#fff" opacity=".92"/>
+    <path d="M24 12c-3-9-12-9-11-4 .8 4 8 4 11 4Zm0 0c3-9 12-9 11-4-.8 4-8 4-11 4Z" fill="#fff" stroke="#a61e63" stroke-width="2" stroke-linejoin="round"/>
+    <rect x="6" y="19" width="36" height="5" rx="2" fill="#fff" opacity=".25"/>
+  </symbol>
+  <symbol id="i-note" viewBox="0 0 48 48">
+    <rect x="9" y="5" width="30" height="39" rx="2" fill="url(#g-paper)" stroke="#5b6f9c" stroke-width="2"/>
+    <rect x="9" y="5" width="30" height="7" rx="2" fill="#2f6fe0" stroke="#1a4fb0" stroke-width="2"/>
+    <path d="M14 20h20M14 26h20M14 32h20M14 38h12" stroke="#7c8fb8" stroke-width="2" stroke-linecap="round"/>
+    <circle cx="15" cy="8.500" r="1.500" fill="#fff"/><circle cx="21" cy="8.500" r="1.500" fill="#fff"/><circle cx="27" cy="8.500" r="1.500" fill="#fff"/>
+  </symbol>
+  <symbol id="i-folder" viewBox="0 0 48 48">
+    <path d="M4 12a3 3 0 0 1 3-3h12l4 5h18a3 3 0 0 1 3 3v22a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3Z" fill="url(#g-folder)" stroke="#b27a10" stroke-width="2" stroke-linejoin="round"/>
+    <path d="M4 20h40" stroke="#fff" stroke-opacity=".6" stroke-width="2"/>
+  </symbol>
+  <symbol id="i-flag" viewBox="0 0 32 30">
+    <path d="M2 5c4-3 8-3 12 0v10C10 12 6 12 2 15Z" fill="#f0452a"/>
+    <path d="M16 6c4 3 8 3 12 0v10c-4 3-8 3-12 0Z" fill="#6cc24a"/>
+    <path d="M2 17c4-3 8-3 12 0v10c-4-3-8-3-12 0Z" fill="#1e78d8"/>
+    <path d="M16 18c4 3 8 3 12 0v10c-4 3-8 3-12 0Z" fill="#fcc419"/>
+  </symbol>
+  <symbol id="i-off" viewBox="0 0 24 24">
+    <rect x="1" y="1" width="22" height="22" rx="4" fill="#e0502c" stroke="#fff" stroke-width="1.500"/>
+    <path d="M12 5v7M7.500 8a6 6 0 1 0 9 0" stroke="#fff" stroke-width="2.200" fill="none" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="i-snow" viewBox="0 0 16 16"><path d="M8 1v14M2 4.500l12 7M2 11.500l12-7M5.500 2 8 4l2.500-2M5.500 14 8 12l2.500 2" stroke="#fff" stroke-width="1.300" fill="none" stroke-linecap="round"/></symbol>
+  <symbol id="i-vol" viewBox="0 0 16 16"><path d="M2 6h3l4-3v10l-4-3H2Z" fill="#fff"/><path d="M11 5.500a3.500 3.500 0 0 1 0 5M12.800 3.800a6 6 0 0 1 0 8.400" stroke="#fff" stroke-width="1.300" fill="none" stroke-linecap="round"/></symbol>
+</svg>
+
+<!-- ============ экран приветствия -->
+<div class="welcome" id="welcome">
+  <div class="w-top"></div>
+  <div class="w-mid">
+    <div class="w-left">
+      <div class="w-logo"><svg viewBox="0 0 32 30" aria-hidden="true"><use href="#i-flag"/></svg><span>Фембой хаус</span></div>
+      <p>Чтобы начать, нажмите на свою учётную запись</p>
+    </div>
+    <div class="w-sep"></div>
+    <div class="w-right">
+      <button class="user" id="login" type="button">
+        <img src="avatar.webp" width="76" height="76" alt="">
+        <span><b>Фембой хаус</b><small>Нажмите, чтобы войти</small></span>
+      </button>
+      <div class="loading" role="status"><b>Загрузка личных параметров…</b><div class="pbar"><i></i></div></div>
+    </div>
+  </div>
+  <div class="w-bot">Чат, игра и рулетка идей — всё на одном рабочем столе</div>
+</div>
+
+<!-- ============ рабочий стол -->
+<main class="desk" id="desk">
+  <svg class="hills" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+    <defs>
+      <linearGradient id="h1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8fd953"/><stop offset="1" stop-color="#4c9c25"/></linearGradient>
+      <linearGradient id="h2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a6ec5e"/><stop offset=".5" stop-color="#5cb52a"/><stop offset="1" stop-color="#2f7d17"/></linearGradient>
+      <radialGradient id="h3" cx=".55" cy=".1" r=".7"><stop offset="0" stop-color="#d6ff8a" stop-opacity=".6"/><stop offset="1" stop-color="#d6ff8a" stop-opacity="0"/></radialGradient>
+    </defs>
+    <path d="M0 640C260 560 620 610 930 575C1190 545 1420 575 1600 540V900H0Z" fill="url(#h1)"/>
+    <path d="M0 770C240 650 640 610 990 690C1250 748 1440 705 1600 655V900H0Z" fill="url(#h2)"/>
+    <path d="M0 770C240 650 640 610 990 690C1250 748 1440 705 1600 655V900H0Z" fill="url(#h3)"/>
+  </svg>
+  <div class="cloud" style="top:9%;--d:150s;--delay:-40s"></div>
+  <div class="cloud" style="top:20%;width:260px;height:70px;--d:190s;--delay:-120s;opacity:.75"></div>
+  <div class="cloud" style="top:33%;width:320px;--d:230s;--delay:-20s;opacity:.6"></div>
+  <canvas id="snow" aria-hidden="true"></canvas>
+
+  <nav class="icons" aria-label="Рабочий стол">
+    <button class="dicon" data-open="profile" type="button"><img src="avatar.webp" alt=""><span>Фембой хаус</span></button>
+    <button class="dicon" data-open="tg" type="button"><svg viewBox="0 0 48 48" aria-hidden="true"><use href="#i-tg"/></svg><span>Телеграм-чат</span></button>
+    <button class="dicon" data-open="game" type="button"><svg viewBox="0 0 48 48" aria-hidden="true"><use href="#i-game"/></svg><span>Игра 16+</span></button>
+    <button class="dicon" data-open="notes" type="button"><svg viewBox="0 0 48 48" aria-hidden="true"><use href="#i-note"/></svg><span>Идеи.txt</span></button>
+  </nav>
+
+  <!-- профиль -->
+  <section class="win" id="w-profile" data-title="Фембой хаус" data-icon="avatar" data-w="720" data-dx="50" data-dy="-20" hidden>
+    <div class="wbody">
+      <div class="explorer">
+        <aside class="pane">
+          <div class="grp"><h3>Ссылки</h3>
+            <ul>
+              <li><a href="https://t.me/+TvHIBSbaHPsyMTZi" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 48 48"><use href="#i-tg"/></svg>Телеграм-чат</a></li>
+              <li><a href="https://www.roblox.com/games/76910515171203/Steal-the-Box-Heist" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 48 48"><use href="#i-game"/></svg>Игра в Роблоксе</a></li>
+              <li><a href="#" data-open="notes"><svg viewBox="0 0 48 48"><use href="#i-note"/></svg>Идеи для видео</a></li>
+            </ul>
+          </div>
+          <div class="grp"><h3>Подробнее</h3><p>Игра пока что 16+. В чате — только свои, личные данные не пишем.</p></div>
+        </aside>
+        <section class="main">
+          <div class="me">
+            <div class="avatar"><img src="avatar.webp" width="102" height="102" alt="Аватарка Фембой хаус: белый котик в новогодней шапке"></div>
+            <div>
+              <h1>Фембой хаус</h1>
+              <p><i class="dot"></i> Статус: рад гостям</p>
+            </div>
+          </div>
+          <p class="bio">Уютный фембой-дом 🏠💙 Игры, чат и рулетка идей</p>
+          <h2>Мои ссылки</h2>
+          <div class="links">
+            <a class="row" href="https://t.me/+TvHIBSbaHPsyMTZi" target="_blank" rel="noopener noreferrer">
+              <svg viewBox="0 0 48 48" aria-hidden="true"><use href="#i-tg"/></svg>
+              <span><b>Телеграм-чат с фембоями</b><small>Заходи общаться и знакомиться</small></span>
+              <span class="xp-btn def go">Открыть</span>
+            </a>
+            <a class="row" href="https://www.roblox.com/games/76910515171203/Steal-the-Box-Heist" target="_blank" rel="noopener noreferrer">
+              <svg viewBox="0 0 48 48" aria-hidden="true"><use href="#i-game"/></svg>
+              <span><b>Украсть коробку <span class="tag">16+</span></b><small>Моя игра в Роблоксе (пока что 16+)</small></span>
+              <span class="xp-btn def go">Играть</span>
+            </a>
+          </div>
+        </section>
+      </div>
+    </div>
+    <div class="status"><span>Объектов: 2</span><span>Мой профиль</span></div>
+  </section>
+
+  <!-- телеграм -->
+  <section class="win" id="w-tg" data-title="Телеграм-чат с фембоями" data-icon="tg" data-w="460" data-dx="-130" data-dy="-60" data-nomax hidden>
+    <div class="wbody">
+      <div class="dlg">
+        <svg viewBox="0 0 48 48" aria-hidden="true"><use href="#i-tg"/></svg>
+        <div>
+          <h4>Открыть чат с фембоями?</h4>
+          <p>Чат откроется в Телеграме. Там можно общаться и знакомиться с такими же, как ты.</p>
+          <p class="tip">💡 Совет: не пиши в чате адрес, школу и другие личные данные, и не отправляй фото незнакомцам.</p>
+        </div>
+        <div class="btns">
+          <a class="xp-btn def" href="https://t.me/+TvHIBSbaHPsyMTZi" target="_blank" rel="noopener noreferrer">Открыть чат</a>
+          <button class="xp-btn" type="button" data-close>Отмена</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- игра -->
+  <section class="win" id="w-game" data-title="Украсть коробку — Roblox" data-icon="game" data-w="500" data-dx="120" data-dy="40" data-nomax hidden>
+    <div class="wbody">
+      <div class="dlg">
+        <div class="shot"><img src="game.jpg" width="720" height="391" alt="Карта игры «Украсть коробку»: сверху, с четырьмя базами"><span class="age">16+</span></div>
+        <svg viewBox="0 0 48 48" aria-hidden="true"><use href="#i-game"/></svg>
+        <div>
+          <h4>Украсть коробку 🎀 Ограбление</h4>
+          <p>Моя игра в Роблоксе. Пока что она 16+.</p>
+        </div>
+        <div class="btns">
+          <a class="xp-btn def" href="https://www.roblox.com/games/76910515171203/Steal-the-Box-Heist" target="_blank" rel="noopener noreferrer">Играть</a>
+          <button class="xp-btn" type="button" data-close>Закрыть</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- блокнот -->
+  <section class="win" id="w-notes" data-title="Идеи.txt — Блокнот" data-icon="note" data-w="480" data-dx="-150" data-dy="110" hidden>
+    <div class="wbody">
+      <div class="note">
+        <div class="menubar" aria-hidden="true"><span>Файл</span><span>Правка</span><span>Формат</span><span>Вид</span><span>Справка</span></div>
+        <pre>Пиши идеи для видео в комментах 💬
+
+В следующих выпусках кручу рулетку идей.
+Чья идея выпадет — про ту будет разбор.
+
+Чем больше комментариев у темы,
+тем выше её шанс выпасть.
+
+Так что пиши и ставь лайки идеям, которые тебе нравятся!</pre>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- ============ меню «пуск» -->
+<div class="smenu" id="smenu" hidden>
+  <header><img src="avatar.webp" alt=""><span>Фембой хаус</span></header>
+  <div class="scols">
+    <div class="l">
+      <a class="mi" href="https://t.me/+TvHIBSbaHPsyMTZi" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 48 48"><use href="#i-tg"/></svg><span><b>Телеграм-чат</b><small>с фембоями</small></span></a>
+      <a class="mi" href="https://www.roblox.com/games/76910515171203/Steal-the-Box-Heist" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 48 48"><use href="#i-game"/></svg><span><b>Игра в Роблоксе</b><small>пока что 16+</small></span></a>
+      <div class="sep"></div>
+      <button class="mi" type="button" data-open="notes"><svg viewBox="0 0 48 48"><use href="#i-note"/></svg><span><b>Идеи для видео</b><small>рулетка идей</small></span></button>
+    </div>
+    <div class="r">
+      <button class="mi" type="button" data-open="profile"><svg viewBox="0 0 48 48"><use href="#i-folder"/></svg><span>Мой профиль</span></button>
+      <button class="mi" type="button" data-open="game"><svg viewBox="0 0 48 48"><use href="#i-game"/></svg><span>О игре</span></button>
+      <button class="mi" type="button" data-open="tg"><svg viewBox="0 0 48 48"><use href="#i-tg"/></svg><span>О чате</span></button>
+    </div>
+  </div>
+  <footer><button type="button" id="logoff"><svg viewBox="0 0 24 24"><use href="#i-off"/></svg>Завершение сеанса</button></footer>
+</div>
+
+<!-- ============ панель задач -->
+<footer class="taskbar">
+  <button class="start" id="start" type="button" aria-haspopup="true" aria-expanded="false"><svg viewBox="0 0 32 30" aria-hidden="true"><use href="#i-flag"/></svg>пуск</button>
+  <div class="tasks" id="tasks"></div>
+  <div class="tray">
+    <button class="opt" id="snowBtn" type="button" aria-pressed="true" aria-label="Снег" title="Снег"><svg viewBox="0 0 16 16"><use href="#i-snow"/></svg></button>
+    <button class="opt" id="volBtn" type="button" aria-pressed="true" aria-label="Звук" title="Звук"><svg viewBox="0 0 16 16"><use href="#i-vol"/></svg></button>
+    <span class="clock" id="clock" aria-label="Время">--:--</span>
+  </div>
+</footer>
+
+<div class="balloon" id="balloon" role="status" hidden>
+  <button class="x" type="button" id="balloonX" aria-label="Закрыть уведомление">×</button>
+  <b><svg viewBox="0 0 48 48"><use href="#i-tg"/></svg>У вас новое приглашение</b>
+  <p>Телеграм-чат с фембоями ждёт тебя. Нажми, чтобы открыть.</p>
+</div>
+
+<script>
+(() => {
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const wide = () => matchMedia('(min-width: 721px)').matches;
+  const coarse = matchMedia('(pointer: coarse)').matches;
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const store = {
+    get(k) { try { return sessionStorage.getItem(k); } catch (e) { return null; } },
+    set(k, v) { try { sessionStorage.setItem(k, v); } catch (e) { /* без хранилища тоже работает */ } },
+  };
+  const desk = $('#desk'), tasks = $('#tasks');
+  const wins = {};
+  let z = 10, active = null;
+
+  // ---------- окна
+  const ico = (kind) => kind === 'avatar' ? '<img class="ticon" src="avatar.webp" alt="">' : `<span class="ticon"><svg viewBox="0 0 48 48"><use href="#i-${kind}"/></svg></span>`;
+  const glyph = {
+    min: '<svg viewBox="0 0 12 12"><path d="M2 9.500h6"/></svg>',
+    max: '<svg viewBox="0 0 12 12"><path d="M2.500 2.500h7v7h-7zM2.500 3.500h7"/></svg>',
+    close: '<svg viewBox="0 0 12 12"><path d="m2.500 2.500 7 7m0-7-7 7"/></svg>',
+  };
+  $$('.win').forEach((el) => {
+    const id = el.id.slice(2), title = el.dataset.title, icon = el.dataset.icon;
+    const bar = document.createElement('div');
+    bar.className = 'titlebar';
+    bar.innerHTML = `${ico(icon)}<span class="ttl">${title}</span><div class="tbtns"><button class="tb min" type="button" aria-label="Свернуть">${glyph.min}</button>${el.hasAttribute('data-nomax') ? '' : `<button class="tb maxb" type="button" aria-label="Развернуть">${glyph.max}</button>`}<button class="tb close" type="button" aria-label="Закрыть">${glyph.close}</button></div>`;
+    el.prepend(bar);
+    el.setAttribute('role', 'dialog');
+    el.setAttribute('aria-label', title);
+    const w = { id, el, bar, btn: null, open: false };
+    wins[id] = w;
+    el.addEventListener('pointerdown', () => focus(id), true);
+    $('.close', bar).addEventListener('click', () => close(id));
+    $('.min', bar).addEventListener('click', () => minimize(id));
+    const mx = $('.maxb', bar);
+    if (mx) mx.addEventListener('click', () => el.classList.toggle('max'));
+    bar.addEventListener('dblclick', (e) => { if (mx && !e.target.closest('.tb')) el.classList.toggle('max'); });
+    $$('[data-close]', el).forEach((b) => b.addEventListener('click', () => close(id)));
+    drag(w);
+  });
+
+  function place(w) {
+    if (!wide()) return;
+    const el = w.el, vw = desk.clientWidth, vh = desk.clientHeight;
+    el.style.width = Math.min(+el.dataset.w, vw - 24) + 'px';
+    const cx = (vw - el.offsetWidth) / 2 + 60 + (+el.dataset.dx || 0), cy = (vh - el.offsetHeight) / 2 + (+el.dataset.dy || 0);
+    el.style.left = Math.max(100, Math.min(cx, vw - el.offsetWidth - 8)) + 'px';
+    el.style.top = Math.max(8, Math.min(cy, vh - el.offsetHeight - 8)) + 'px';
+  }
+
+  function open(id) {
+    const w = wins[id];
+    if (!w) return;
+    closeMenu();
+    if (!w.open) {
+      w.open = true;
+      w.el.hidden = false;
+      w.el.classList.remove('min');
+      place(w);
+      const t = document.createElement('button');
+      t.type = 'button';
+      t.className = 'task';
+      t.innerHTML = `${ico(w.el.dataset.icon)}<span>${w.el.dataset.title}</span>`;
+      t.setAttribute('aria-label', w.el.dataset.title);
+      t.addEventListener('click', () => { w.el.classList.contains('min') || active !== id ? (w.el.classList.remove('min'), focus(id)) : minimize(id); });
+      tasks.append(t);
+      w.btn = t;
+    }
+    w.el.classList.remove('min');
+    focus(id);
+  }
+  function close(id) {
+    const w = wins[id];
+    if (!w || !w.open) return;
+    w.open = false;
+    w.el.hidden = true;
+    w.el.classList.remove('max', 'min');
+    w.btn && w.btn.remove();
+    w.btn = null;
+    if (active === id) { active = null; const top = Object.values(wins).filter((x) => x.open && !x.el.classList.contains('min')).sort((a, b) => b.el.style.zIndex - a.el.style.zIndex)[0]; top ? focus(top.id) : sync(); }
+  }
+  function minimize(id) {
+    const w = wins[id];
+    w.el.classList.add('min');
+    if (active === id) active = null;
+    sync();
+  }
+  function focus(id) {
+    const w = wins[id];
+    if (!w || !w.open) return;
+    active = id;
+    w.el.style.zIndex = ++z;
+    sync();
+  }
+  function sync() {
+    Object.values(wins).forEach((w) => {
+      const isAct = active === w.id && w.open && !w.el.classList.contains('min');
+      w.el.classList.toggle('inactive', w.open && !isAct);
+      if (w.btn) w.btn.classList.toggle('act', isAct);
+    });
+  }
+
+  function drag(w) {
+    let sx, sy, ox, oy, on = false;
+    w.bar.addEventListener('pointerdown', (e) => {
+      if (!wide() || w.el.classList.contains('max') || e.target.closest('.tb') || e.button > 0) return;
+      on = true;
+      sx = e.clientX; sy = e.clientY; ox = w.el.offsetLeft; oy = w.el.offsetTop;
+      w.bar.setPointerCapture(e.pointerId);
+    });
+    w.bar.addEventListener('pointermove', (e) => {
+      if (!on) return;
+      const vw = desk.clientWidth, vh = desk.clientHeight;
+      w.el.style.left = Math.max(-w.el.offsetWidth + 90, Math.min(ox + e.clientX - sx, vw - 90)) + 'px';
+      w.el.style.top = Math.max(0, Math.min(oy + e.clientY - sy, vh - 34)) + 'px';
+    });
+    const end = () => { on = false; };
+    w.bar.addEventListener('pointerup', end);
+    w.bar.addEventListener('pointercancel', end);
+  }
+
+  addEventListener('resize', () => {
+    if (!wide()) return;
+    Object.values(wins).forEach((w) => {
+      if (!w.open || w.el.classList.contains('max')) return;
+      const vw = desk.clientWidth, vh = desk.clientHeight;
+      w.el.style.width = Math.min(+w.el.dataset.w, vw - 24) + 'px';
+      w.el.style.left = Math.max(0, Math.min(w.el.offsetLeft, vw - w.el.offsetWidth)) + 'px';
+      w.el.style.top = Math.max(0, Math.min(w.el.offsetTop, vh - 40)) + 'px';
+    });
+  });
+
+  // ---------- значки, ссылки на окна
+  $$('.dicon').forEach((b) => {
+    b.addEventListener('click', () => {
+      $$('.dicon.sel').forEach((x) => x.classList.remove('sel'));
+      b.classList.add('sel');
+      if (coarse) open(b.dataset.open);
+    });
+    b.addEventListener('dblclick', () => open(b.dataset.open));
+    b.addEventListener('keydown', (e) => { if (e.key === 'Enter') open(b.dataset.open); });
+  });
+  desk.addEventListener('pointerdown', (e) => { if (!e.target.closest('.dicon')) $$('.dicon.sel').forEach((x) => x.classList.remove('sel')); });
+  document.addEventListener('click', (e) => {
+    const t = e.target.closest('[data-open]');
+    if (t && !t.classList.contains('dicon')) { e.preventDefault(); open(t.dataset.open); }
+  });
+
+  // ---------- «пуск»
+  const menu = $('#smenu'), startBtn = $('#start');
+  function closeMenu() { menu.hidden = true; startBtn.classList.remove('on'); startBtn.setAttribute('aria-expanded', 'false'); }
+  startBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const show = menu.hidden;
+    menu.hidden = !show;
+    startBtn.classList.toggle('on', show);
+    startBtn.setAttribute('aria-expanded', String(show));
+  });
+  document.addEventListener('pointerdown', (e) => { if (!menu.hidden && !e.target.closest('#smenu, #start')) closeMenu(); });
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    if (!menu.hidden) { closeMenu(); startBtn.focus(); }
+    else if (active) close(active);
+  });
+
+  // ---------- часы
+  const clock = $('#clock');
+  const tick = () => { clock.textContent = new Date().toLocaleTimeString('ru-RU', {hour: '2-digit', minute: '2-digit'}); };
+  tick(); setInterval(tick, 15000);
+
+  // ---------- звук: короткий «вход», собственная мелодия, синтезируется на месте
+  let ac = null, soundOn = true;
+  function chime() {
+    if (!soundOn) return;
+    try {
+      ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+      const t0 = ac.currentTime + 0.03;
+      [[392, 0], [523.25, 0.16], [659.25, 0.32], [783.99, 0.5], [1046.5, 0.74]].forEach(([f, d], i, a) => {
+        const o = ac.createOscillator(), g = ac.createGain(), last = i === a.length - 1;
+        o.type = 'sine'; o.frequency.value = f;
+        g.gain.setValueAtTime(0.0001, t0 + d);
+        g.gain.exponentialRampToValueAtTime(last ? 0.22 : 0.16, t0 + d + 0.03);
+        g.gain.exponentialRampToValueAtTime(0.0001, t0 + d + (last ? 1.6 : 0.6));
+        o.connect(g).connect(ac.destination);
+        o.start(t0 + d); o.stop(t0 + d + (last ? 1.7 : 0.7));
+      });
+    } catch (e) { /* без звука */ }
+  }
+  const volBtn = $('#volBtn');
+  volBtn.addEventListener('click', () => { soundOn = !soundOn; volBtn.setAttribute('aria-pressed', String(soundOn)); });
+
+  // ---------- снег
+  const cv = $('#snow'), ctx = cv.getContext('2d');
+  let flakes = [], snowOn = !reduce, W = 0, H = 0, raf = 0;
+  function sizeSnow() {
+    const d = Math.min(devicePixelRatio || 1, 2);
+    W = desk.clientWidth; H = desk.clientHeight;
+    cv.width = W * d; cv.height = H * d;
+    ctx.setTransform(d, 0, 0, d, 0, 0);
+    const n = Math.round(Math.min(90, W / 16));
+    while (flakes.length < n) flakes.push({x: Math.random() * W, y: Math.random() * H, r: 1 + Math.random() * 2.6, v: 0.35 + Math.random() * 0.9, p: Math.random() * 6});
+    flakes.length = n;
+  }
+  function snowLoop(now) {
+    ctx.clearRect(0, 0, W, H);
+    if (snowOn) {
+      ctx.fillStyle = 'rgba(255,255,255,.88)';
+      for (const f of flakes) {
+        f.y += f.v; f.x += Math.sin(now / 1500 + f.p) * 0.35;
+        if (f.y > H + 4) { f.y = -4; f.x = Math.random() * W; }
+        ctx.beginPath(); ctx.arc(f.x, f.y, f.r, 0, 6.283); ctx.fill();
+      }
+    }
+    raf = requestAnimationFrame(snowLoop);
+  }
+  sizeSnow();
+  addEventListener('resize', sizeSnow);
+  document.addEventListener('visibilitychange', () => { cancelAnimationFrame(raf); if (!document.hidden) raf = requestAnimationFrame(snowLoop); });
+  raf = requestAnimationFrame(snowLoop);
+  const snowBtn = $('#snowBtn');
+  snowBtn.setAttribute('aria-pressed', String(snowOn));
+  snowBtn.addEventListener('click', () => { snowOn = !snowOn; snowBtn.setAttribute('aria-pressed', String(snowOn)); });
+
+  // ---------- уведомление из трея
+  const balloon = $('#balloon');
+  let balloonTimer = 0;
+  function showBalloon() {
+    if (store.get('fh-balloon')) return;
+    balloon.hidden = false;
+    store.set('fh-balloon', '1');
+    balloonTimer = setTimeout(() => { balloon.hidden = true; }, 12000);
+  }
+  $('#balloonX').addEventListener('click', (e) => { e.stopPropagation(); balloon.hidden = true; clearTimeout(balloonTimer); });
+  balloon.addEventListener('click', () => { balloon.hidden = true; clearTimeout(balloonTimer); open('tg'); });
+
+  // ---------- вход и выход
+  const welcome = $('#welcome');
+  function enter(fast) {
+    welcome.classList.add('out');
+    setTimeout(() => { welcome.hidden = true; }, fast ? 0 : 520);
+    store.set('fh-in', '1');
+    if (!wins.profile.open) open('profile');
+    if (!fast) setTimeout(showBalloon, 4500);
+  }
+  $('#login').addEventListener('click', () => {
+    chime();
+    welcome.classList.add('busy');
+    setTimeout(() => enter(false), reduce ? 300 : 1300);
+  });
+  $('#logoff').addEventListener('click', () => {
+    closeMenu();
+    Object.keys(wins).forEach(close);
+    try { sessionStorage.removeItem('fh-in'); } catch (e) { /* ок */ }
+    welcome.hidden = false;
+    welcome.classList.remove('busy');
+    requestAnimationFrame(() => welcome.classList.remove('out'));
+    $('#login').focus();
+  });
+  if (store.get('fh-in')) { welcome.hidden = true; open('profile'); }
+  else $('#login').focus();
+})();
+</script>
+</body>
+</html>
